@@ -3,6 +3,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
+
 import data
 
 data.initialize_db()
@@ -10,200 +11,188 @@ data.initialize_db()
 root = Tk()
 root.title("Task Manager")
 
-w, h = root.winfo_screenwidth(), root.winfo_screenheight()
-root.geometry("%dx%d+0+0" % (w, h))
+width, height = root.winfo_screenwidth(), root.winfo_screenheight()
+root.geometry("{0}x{1}+0+0".format(width, height))
 
-w_id = int(w * 0.04)
-w_name = int(w * 0.25)
-w_priority = int(w * 0.05)
-w_category = int(w * 0.2)
-w_is_finished = int(w * 0.1)
+width_id = int(width * 0.04)
+width_name = int(width * 0.25)
+width_priority = int(width * 0.05)
+width_category = int(width * 0.2)
+width_is_finished = int(width * 0.1)
 
 tree = ttk.Treeview(root, height=36, columns=('name', 'priority', 'category', 'is_finished'))
 
-tree.column('#0', width=w_id, anchor='center')
+tree.column('#0', width=width_id, anchor='center')
 tree.heading('#0', text='Id')
-tree.column('name', width=w_name, anchor='center')
+tree.column('name', width=width_name, anchor='center')
 tree.heading('name', text='Name')
-tree.column('priority', width=w_priority, anchor='center')
+tree.column('priority', width=width_priority, anchor='center')
 tree.heading('priority', text='Priority')
-tree.column('category', width=w_category, anchor='center')
+tree.column('category', width=width_category, anchor='center')
 tree.heading('category', text='Category')
-tree.column('is_finished', width=w_is_finished, anchor='center')
+tree.column('is_finished', width=width_is_finished, anchor='center')
 tree.heading('is_finished', text='Is Finished')
 
-s = ttk.Scrollbar(root, orient=VERTICAL, command=tree.yview)
-tree.configure(yscrollcommand=s.set)
+scrollbar = ttk.Scrollbar(root, orient=VERTICAL, command=tree.yview)
+tree.configure(yscrollcommand=scrollbar.set)
 
 mainframe = ttk.Frame(root, padding="25 25 100 50")
 mainframe.grid(row=0, column=2, sticky=(N, S, W, E))
-mainframe.columnconfigure(0, weight=1)
 mainframe.rowconfigure(0, weight=1)
+mainframe.columnconfigure(0, weight=1)
 
-nameee = StringVar()
-priorityee = StringVar()
-categoryee = StringVar()
-is_finishedee = StringVar()
+name = StringVar()
+priority = StringVar()
+category = StringVar()
+is_finished = StringVar()
 
 ttk.Label(mainframe, text='Name:').grid(column=1, row=1, sticky=(W, E))
-namee = ttk.Entry(mainframe, width=20, textvariable=nameee)
-namee.grid(column=2, row=1, sticky=(W, E))
+name_widget = ttk.Entry(mainframe, width=20, textvariable=name)
+name_widget.grid(column=2, row=1, sticky=(W, E))
 
 ttk.Label(mainframe, text='Priority:').grid(column=1, row=2, sticky=(W, E))
-prioritye = ttk.Entry(mainframe, width=20, textvariable=priorityee)
-prioritye.grid(column=2, row=2, sticky=(W, E))
+priority_widget = ttk.Entry(mainframe, width=20, textvariable=priority)
+priority_widget.grid(column=2, row=2, sticky=(W, E))
 
 ttk.Label(mainframe, text='Category:').grid(column=1, row=3, sticky=(W, E))
-categorye = ttk.Entry(mainframe, width=20, textvariable=categoryee)
-categorye.grid(column=2, row=3, sticky=(W, E))
+category_widget = ttk.Entry(mainframe, width=20, textvariable=category)
+category_widget.grid(column=2, row=3, sticky=(W, E))
 
 ttk.Label(mainframe, text='Is Finished:').grid(column=1, row=4, sticky=(W, E))
-is_finishede = ttk.Checkbutton(mainframe, variable=is_finishedee, onvalue='True', offvalue='False')
-is_finishede.grid(column=2, row=4, sticky=(W, E))
+is_finished_widget = ttk.Checkbutton(mainframe, variable=is_finished, onvalue='True', offvalue='False')
+is_finished_widget.grid(column=2, row=4, sticky=(W, E))
 
 
-def calculate1():
+def create_item():
     """TODO."""
-    global nameee, priorityee, categoryee, is_finishedee
-    ne = nameee.get()
-    pe = priorityee.get()
-    ce = categoryee.get()
-    ie = is_finishedee.get()
+    name_value = name.get()
+    priority_value = priority.get()
+    category_value = category.get()
+    is_finished_value = is_finished.get()
 
-    if validate():
-        item_text = tree.item(tree.selection()[0], "text")
-        item_values = (ne, pe, ce, ie)
+    if validate_inputs():
+        item_values = (name_value, priority_value, category_value, is_finished_value)
 
-        data.change_item(str(item_text), item_values)
+        item_id = data.create_item(item_values)
 
+        tree.insert('', 'end', item_id, text=item_id, values=(item_values[0], item_values[1], item_values[2], item_values[3]))
+
+        name.set("")
+        priority.set("")
+        category.set("")
+        is_finished.set("")
+
+        create_button['state'] = 'normal'
+        change_button['state'] = 'disabled'
+
+
+def change_item():
+    """TODO."""
+    name_value = name.get()
+    priority_value = priority.get()
+    category_value = category.get()
+    is_finished_value = is_finished.get()
+
+    if validate_inputs():
+        item_id = tree.item(tree.selection()[0], "text")
+        item_values = (name_value, priority_value, category_value, is_finished_value)
+        data.change_item(str(item_id), item_values)
         tree.item(tree.selection()[0], values=item_values)
 
-        nameee.set("")
-        priorityee.set("")
-        categoryee.set("")
-        is_finishedee.set("")
+        name.set("")
+        priority.set("")
+        category.set("")
+        is_finished.set("")
 
-        global but
-        but['state'] = 'disabled'
-        global bt
-        bt['state'] = 'normal'
+        create_button['state'] = 'normal'
+        change_button['state'] = 'disabled'
 
 
-def cr():
-    """TODO."""
-    global nameee, priorityee, categoryee, is_finishedee
-    ne = nameee.get()
-    pe = priorityee.get()
-    ce = categoryee.get()
-    ie = is_finishedee.get()
+create_button = ttk.Button(mainframe, text="Create Task", command=create_item)
+create_button.grid(column=1, row=5, sticky=(W, E))
 
-    if validate():
-        item_values = (ne, pe, ce, ie)
-
-        item_text = data.create_item(item_values)
-
-        tree.insert('', 'end', item_text, text=item_text, values=(item_values[0], item_values[1], item_values[2], item_values[3]))
-
-        nameee.set("")
-        priorityee.set("")
-        categoryee.set("")
-        is_finishedee.set("")
-
-        global but
-        but['state'] = 'disabled'
-        global bt
-        bt['state'] = 'normal'
-
-
-bt = ttk.Button(mainframe, text="Create Task", command=cr)
-bt.grid(column=1, row=5, sticky=(W, E))
-
-but = ttk.Button(mainframe, text="Change Task", command=calculate1)
-but.grid(column=2, row=5, sticky=(W, E))
-but['state'] = 'disabled'
+change_button = ttk.Button(mainframe, text="Change Task", command=change_item)
+change_button.grid(column=2, row=5, sticky=(W, E))
+change_button['state'] = 'disabled'
 
 for child in mainframe.winfo_children():
     child.grid_configure(padx=25, pady=25)
 
 tree.grid(row=0, column=0, rowspan=2)
-s.grid(row=0, column=1, rowspan=2, sticky=(W, N, E, S))
+scrollbar.grid(row=0, column=1, rowspan=2, sticky=(W, N, E, S))
 
 for item in data.get_items():
     tree.insert('', 'end', item[0], text=item[0], values=(item[1], item[2], item[3], item[4]))
 
 
-def closure():
+def remove_item_helper():
     """TODO."""
-    item_text = tree.item(tree.selection()[0], "text")
-    data.remove_item(str(item_text))
-    tree.delete(item_text)
+    item_id = tree.item(tree.selection()[0], "text")
+    data.remove_item(str(item_id))
+    tree.delete(item_id)
 
 
-def closure_Change():
+def change_item_helper():
     """TODO."""
-    global but
-    but['state'] = 'normal'
-    global bt
-    bt['state'] = 'disabled'
-    #item_text = tree.item(tree.selection()[0], "text")
     item_values = tree.item(tree.selection()[0], "values")
-    #data.change_item(item_text, item_values)
-    global nameee, priorityee, categoryee, is_finishedee
-    nameee.set(item_values[0])
-    priorityee.set(item_values[1])
-    categoryee.set(item_values[2])
-    is_finishedee.set(item_values[3])
+
+    name.set(item_values[0])
+    priority.set(item_values[1])
+    category.set(item_values[2])
+    is_finished.set(item_values[3])
+
+    create_button['state'] = 'disabled'
+    change_button['state'] = 'normal'
 
 
 menu = Menu(root, tearoff=0)
-menu.add_command(label="Remove Task", command=closure)
-menu.add_command(label="Change Task", command=closure_Change)
+menu.add_command(label="Remove Task", command=remove_item_helper)
+menu.add_command(label="Change Task", command=change_item_helper)
 
 
-def func(event):
+def right_click_handler(event):
     """TODO."""
-    popup(event, item)
+    show_contextual_menu(event, item)
 
 
-tree.bind("<3>", func)
+tree.bind("<3>", right_click_handler)
 
 
-def popup(event, item):
+def show_contextual_menu(event, item):
     """TODO."""
     if tree.focus():
         menu.post(event.x + 65, event.y)
 
 
-def func1(event):
+def left_click_handler(event):
     """TODO."""
     menu.unpost()
 
 
-tree.bind("<1>", func1)
+tree.bind("<1>", left_click_handler)
 
 
-def on_closing():
+def shutdown_hook():
     """TODO."""
     if messagebox.askyesno(message='Are you sure you want to quit?', icon='question', title='Quit'):
         data.shutdown_db()
         root.destroy()
 
 
-root.protocol("WM_DELETE_WINDOW", on_closing)
+root.protocol("WM_DELETE_WINDOW", shutdown_hook)
 
 
-def validate():
+def validate_inputs():
     """TODO."""
-    global nameee, priorityee, categoryee
-    ne = nameee.get()
-    pe = priorityee.get()
-    ce = categoryee.get()
+    name_value = name.get()
+    priority_value = priority.get()
+    category_value = category.get()
 
-    if not(len(ne) > 0 and len(ne) <= 30):
+    if not(len(name_value) > 0 and len(name_value) <= 30):
         return False
-    if not(int(pe) > 0 and int(pe) <= 10):
+    if not(int(priority_value) > 0 and int(priority_value) <= 10):
         return False
-    if not(len(ce) > 0 and len(ce) <= 30):
+    if not(len(category_value) > 0 and len(category_value) <= 30):
         return False
 
     return True

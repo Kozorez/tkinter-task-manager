@@ -32,7 +32,6 @@ def change_item(text, values):
 def create_item(values):
     """TODO."""
     cur = conn.cursor()
-
     cur.execute("INSERT INTO tasks (name, priority, category, is_finished) VALUES ('" + values[0] + "', " + values[1] + ", '" + values[2] + "', " + values[3] + ") RETURNING id;" );
     text = cur.fetchone()[0]
     conn.commit()
