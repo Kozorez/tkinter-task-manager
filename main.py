@@ -1,12 +1,27 @@
 """TODO."""
 
+import sys
+
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
+from tkinter import simpledialog
 
 import data
 
-data.initialize_db()
+password_root = Tk()
+password_root.withdraw()
+password = simpledialog.askstring("Password", "Enter password:", show='*')
+password_root.destroy()
+
+if password is None:
+    sys.exit()
+
+try:
+    data.initialize_db(password)
+except:
+    print("PASSWORD IS INCORRECT. TRY AGAIN...")
+    sys.exit()
 
 root = Tk()
 root.title("Task Manager")
@@ -14,16 +29,28 @@ root.title("Task Manager")
 width, height = root.winfo_screenwidth(), root.winfo_screenheight()
 root.geometry("{0}x{1}+0+0".format(width, height))
 
-width_id = int(width * 0.04)
-width_name = int(width * 0.25)
-width_priority = int(width * 0.05)
-width_category = int(width * 0.2)
-width_is_finished = int(width * 0.1)
+width_name = int(width * 0.26)
+width_priority = int(width * 0.06)
+width_category = int(width * 0.21)
+width_is_finished = int(width * 0.11)
 
-tree = ttk.Treeview(root, height=36, columns=('name', 'priority', 'category', 'is_finished'))
 
-tree.column('#0', width=width_id, anchor='center')
-tree.heading('#0', text='Id')
+def treeview_sort_column(tv, col, reverse):
+    """TODO."""
+    l = [(tv.set(k, col), k) for k in tv.get_children('')]
+    l.sort(reverse=reverse)
+
+    for index, (val, k) in enumerate(l):
+        tv.move(k, '', index)
+
+    tv.heading(col, command=lambda: treeview_sort_column(tv, col, not reverse))
+
+
+columns = ('name', 'priority', 'category', 'is_finished')
+tree = ttk.Treeview(root, height=36, columns=columns, show="headings")
+for col in columns:
+    tree.heading(col, text=col, command=lambda _col=col: treeview_sort_column(tree, _col, False))
+
 tree.column('name', width=width_name, anchor='center')
 tree.heading('name', text='Name')
 tree.column('priority', width=width_priority, anchor='center')

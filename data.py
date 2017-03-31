@@ -39,11 +39,11 @@ def create_item(values):
     return text
 
 
-def initialize_db():
+def initialize_db(password):
     """TODO."""
     print('INITIALIZING...')
     global conn
-    conn = psycopg2.connect(database="testtest", user="viktor", password="v1i2t3y4a5!", host="127.0.0.1", port="5432")
+    conn = psycopg2.connect(database="testtest", user="viktor", password=password, host="127.0.0.1", port="5432")
 
 
 def shutdown_db():
