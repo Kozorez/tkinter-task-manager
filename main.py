@@ -45,6 +45,7 @@ name = StringVar()
 priority = StringVar()
 category = StringVar()
 is_finished = StringVar()
+is_finished.set('False')
 
 ttk.Label(mainframe, text='Name:').grid(column=1, row=1, sticky=(W, E))
 name_widget = ttk.Entry(mainframe, width=20, textvariable=name)
@@ -80,7 +81,7 @@ def create_item():
         name.set("")
         priority.set("")
         category.set("")
-        is_finished.set("")
+        is_finished.set('False')
 
         create_button['state'] = 'normal'
         change_button['state'] = 'disabled'
