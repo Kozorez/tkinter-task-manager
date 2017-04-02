@@ -7,7 +7,7 @@ from tkinter import ttk
 from tkinter import messagebox
 from tkinter import simpledialog
 
-import data
+import db
 
 password_root = Tk()
 password_root.withdraw()
@@ -18,7 +18,7 @@ if password is None:
     sys.exit()
 
 try:
-    data.initialize_db(password)
+    db.initialize_db(password)
 except:
     print("PASSWORD IS INCORRECT. TRY AGAIN...")
     sys.exit()
@@ -47,7 +47,7 @@ def treeview_sort_column(tv, col, reverse):
 
 
 columns = ('name', 'priority', 'category', 'is_finished')
-tree = ttk.Treeview(root, height=36, columns=columns, show="headings")
+tree = ttk.Treeview(root, height=36, columns=columns, show="headings", selectmode="browse")
 for col in columns:
     tree.heading(col, text=col, command=lambda _col=col: treeview_sort_column(tree, _col, False))
 
@@ -71,8 +71,7 @@ mainframe.columnconfigure(0, weight=1)
 name = StringVar()
 priority = StringVar()
 category = StringVar()
-is_finished = StringVar()
-is_finished.set('False')
+is_finished = BooleanVar()
 
 ttk.Label(mainframe, text='Name:').grid(column=1, row=1, sticky=(W, E))
 name_widget = ttk.Entry(mainframe, width=20, textvariable=name)
@@ -87,7 +86,7 @@ category_widget = ttk.Entry(mainframe, width=20, textvariable=category)
 category_widget.grid(column=2, row=3, sticky=(W, E))
 
 ttk.Label(mainframe, text='Is Finished:').grid(column=1, row=4, sticky=(W, E))
-is_finished_widget = ttk.Checkbutton(mainframe, variable=is_finished, onvalue='True', offvalue='False')
+is_finished_widget = ttk.Checkbutton(mainframe, variable=is_finished, onvalue=True, offvalue=False)
 is_finished_widget.grid(column=2, row=4, sticky=(W, E))
 
 
@@ -101,7 +100,7 @@ def create_item():
     if validate_inputs():
         item_values = (name_value, priority_value, category_value, is_finished_value)
 
-        item_id = data.create_item(item_values)
+        item_id = db.add_task(item_values)
 
         tree.insert('', 'end', item_id, text=item_id, values=(item_values[0], item_values[1], item_values[2], item_values[3]))
 
@@ -124,7 +123,7 @@ def change_item():
     if validate_inputs():
         item_id = tree.item(tree.selection()[0], "text")
         item_values = (name_value, priority_value, category_value, is_finished_value)
-        data.change_item(str(item_id), item_values)
+        db.edit_task(str(item_id), item_values)
         tree.item(tree.selection()[0], values=item_values)
 
         name.set("")
@@ -149,14 +148,14 @@ for child in mainframe.winfo_children():
 tree.grid(row=0, column=0, rowspan=2)
 scrollbar.grid(row=0, column=1, rowspan=2, sticky=(W, N, E, S))
 
-for item in data.get_items():
+for item in db.get_tasks():
     tree.insert('', 'end', item[0], text=item[0], values=(item[1], item[2], item[3], item[4]))
 
 
 def remove_item_helper():
     """TODO."""
     item_id = tree.item(tree.selection()[0], "text")
-    data.remove_item(str(item_id))
+    db.delete_task(str(item_id))
     tree.delete(item_id)
 
 
@@ -203,7 +202,7 @@ tree.bind("<1>", left_click_handler)
 def shutdown_hook():
     """TODO."""
     if messagebox.askyesno(message='Are you sure you want to quit?', icon='question', title='Quit'):
-        data.shutdown_db()
+        db.shutdown_db()
         root.destroy()
 
 

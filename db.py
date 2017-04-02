@@ -5,7 +5,7 @@ import psycopg2
 conn = None
 
 
-def get_items():
+def get_tasks():
     """TODO."""
     cur = conn.cursor()
     cur.execute("SELECT id, name, priority, category, is_finished from tasks;")
@@ -13,7 +13,7 @@ def get_items():
     return rows
 
 
-def remove_item(item):
+def delete_task(item):
     """TODO."""
     cur = conn.cursor()
     cur.execute("DELETE from tasks where id = " + item + ";")
@@ -21,18 +21,18 @@ def remove_item(item):
     print("Number of records deleted:", cur.rowcount)
 
 
-def change_item(text, values):
+def edit_task(text, values):
     """TODO."""
     cur = conn.cursor()
-    cur.execute("UPDATE tasks set name = '" + values[0] + "', priority = " + values[1] + ", category = '" + values[2] + "', is_finished = " + values[3] + " where ID = " + text + ";")
+    cur.execute("UPDATE tasks set name = '" + values[0] + "', priority = " + values[1] + ", category = '" + values[2] + "', is_finished = " + str(values[3]) + " where ID = " + text + ";")
     conn.commit()
     print("Number of records updated:", cur.rowcount)
 
 
-def create_item(values):
+def add_task(values):
     """TODO."""
     cur = conn.cursor()
-    cur.execute("INSERT INTO tasks (name, priority, category, is_finished) VALUES ('" + values[0] + "', " + values[1] + ", '" + values[2] + "', " + values[3] + ") RETURNING id;" );
+    cur.execute("INSERT INTO tasks (name, priority, category, is_finished) VALUES ('" + values[0] + "', " + values[1] + ", '" + values[2] + "', " + str(values[3]) + ") RETURNING id;" );
     text = cur.fetchone()[0]
     conn.commit()
     print("Records created successfully")
