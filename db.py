@@ -18,7 +18,7 @@ def initialize_db(password):
     global conn
 
     try:
-        conn = psycopg2.connect(database="testtest",
+        conn = psycopg2.connect(database="task_manager",
                                 user="viktor",
                                 password=password,
                                 host="127.0.0.1",
